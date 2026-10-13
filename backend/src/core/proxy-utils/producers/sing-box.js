@@ -120,7 +120,7 @@ const wsParser = (proxy, parsedProxy) => {
                 if (value.length > 0) headers[key] = value;
             }
             const { Host: wsHost } = headers;
-            if (wsHost.length === 1)
+            if (wsHost?.length === 1)
                 for (const item of `Host:${wsHost[0]}`.split('\n')) {
                     const [key, value] = item.split(':');
                     if (value.trim() === '') continue;
@@ -138,7 +138,7 @@ const wsParser = (proxy, parsedProxy) => {
             if (value.length > 0) headers[key] = value;
         }
         const { Host: wsHost } = headers;
-        if (wsHost.length === 1)
+        if (wsHost?.length === 1)
             for (const item of `Host:${wsHost[0]}`.split('\n')) {
                 const [key, value] = item.split(':');
                 if (value.trim() === '') continue;
@@ -159,7 +159,7 @@ const wsParser = (proxy, parsedProxy) => {
         }
     }
 
-    if (parsedProxy.tls.insecure)
+    if (parsedProxy.tls.insecure && transport.headers.Host?.length)
         parsedProxy.tls.server_name = transport.headers.Host[0];
     if (proxy['ws-opts'] && proxy['ws-opts']['v2ray-http-upgrade']) {
         transport.type = 'httpupgrade';
