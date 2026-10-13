@@ -37,6 +37,63 @@ function captureErrors(fn) {
 }
 
 describe('Proxy structured producers', function () {
+    it('handles websocket options without a Host header', function () {
+        const output = loadProducedJson('sing-box', {
+            type: 'vless',
+            name: 'WS Path Only',
+            server: 'vless.example.com',
+            port: 443,
+            uuid: UUID,
+            network: 'ws',
+            'ws-opts': { path: '/ws' },
+        });
+
+        expect(output.outbounds).to.have.length(1);
+        expectSubset(output.outbounds[0].transport, {
+            type: 'ws',
+            path: '/ws',
+            headers: {},
+        });
+    });
+
+    it('handles websocket headers without a Host header', function () {
+        const output = loadProducedJson('sing-box', {
+            type: 'vless',
+            name: 'WS Custom Header',
+            server: 'vless.example.com',
+            port: 443,
+            uuid: UUID,
+            network: 'ws',
+            'ws-headers': { 'X-Test': 'one' },
+        });
+
+        expect(output.outbounds).to.have.length(1);
+        expectSubset(output.outbounds[0].transport, {
+            type: 'ws',
+            headers: { 'X-Test': 'one' },
+        });
+    });
+
+    it('does not infer a TLS server name when insecure websocket transport has no Host', function () {
+        const output = loadProducedJson('sing-box', {
+            type: 'vless',
+            name: 'WS Insecure Without Host',
+            server: 'vless.example.com',
+            port: 443,
+            uuid: UUID,
+            tls: true,
+            'skip-cert-verify': true,
+            network: 'ws',
+            'ws-opts': { path: '/ws' },
+        });
+
+        expect(output.outbounds).to.have.length(1);
+        expectSubset(output.outbounds[0].transport, {
+            type: 'ws',
+            path: '/ws',
+        });
+    });
+
     it('filters unsupported Clash proxies by default and normalizes vmess ws early data', function () {
         const proxies = [
             {
